@@ -27,7 +27,10 @@ uses
   task_services.impl,
   tag_models,
   tag_services,
-  tag_services_impl;
+  tag_services_impl,
+  comment_models,
+  comment_services,
+  comment_services_impl;
 
 var
   Model: TOrmModel;
@@ -184,7 +187,7 @@ begin
   WriteLn('');
   
   // Create ORM model with all entities
-  Model := TOrmModel.Create([TTask, TTag, TTaskTag], 'taskmanager');
+  Model := TOrmModel.Create([TTask, TTag, TTaskTag, TComment], 'taskmanager');
   try
     WriteLn('Creating database...');
     
@@ -200,6 +203,7 @@ begin
       WriteLn('Registering services...');
       Server.ServiceDefine(TTaskService, [ITaskService], sicShared);
       Server.ServiceDefine(TTagService, [ITagService], sicShared);
+      Server.ServiceDefine(TCommentService, [ICommentService], sicShared);
       WriteLn('Services registered successfully');
       
       // Create sample data if database is empty
@@ -232,6 +236,7 @@ begin
         WriteLn('SOA Services available at:');
         WriteLn('  http://localhost:8080/taskmanager/TaskService');
         WriteLn('  http://localhost:8080/taskmanager/TagService');
+        WriteLn('  http://localhost:8080/taskmanager/CommentService');
         WriteLn('');
         WriteLn('Web Interface:');
         WriteLn('  Open static/index.html in your browser');
@@ -257,7 +262,8 @@ begin
   // Register interfaces before using them
   TInterfaceFactory.RegisterInterfaces([
     TypeInfo(ITaskService),
-    TypeInfo(ITagService)
+    TypeInfo(ITagService),
+    TypeInfo(ICommentService)
   ]);
   
   try

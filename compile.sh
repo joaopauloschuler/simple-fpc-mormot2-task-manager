@@ -6,6 +6,10 @@ echo "mORMot2 Task Manager - Compilation Script"
 echo "=========================================="
 echo ""
 
+# Determine the script directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
+
 # Check if FPC is installed
 if ! command -v fpc &> /dev/null; then
     echo "Error: Free Pascal Compiler (fpc) is not installed"
@@ -36,7 +40,7 @@ if [ $? -eq 0 ]; then
     echo "✓ Binary: bin/task_manager"
     echo ""
     echo "To run the server:"
-    echo "  ./bin/task_manager"
+    echo "  cd $SCRIPT_DIR && ./bin/task_manager"
     echo ""
     echo "The server will be available at:"
     echo "  http://localhost:8080"
