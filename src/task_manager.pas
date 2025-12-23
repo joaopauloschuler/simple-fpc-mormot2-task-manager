@@ -181,6 +181,9 @@ begin
 end;
 
 procedure Run;
+var
+  DataFolder: string;
+  DBFileName: string;
 begin
   WriteLn('mORMot2 Task Manager Server');
   WriteLn('============================');
@@ -189,10 +192,13 @@ begin
   // Create ORM model with all entities
   Model := TOrmModel.Create([TTask, TTag, TTaskTag, TComment], 'taskmanager');
   try
-    WriteLn('Creating database...');
+    // Determine data folder from the binary location
+    DataFolder := ExtractFilePath(ParamStr(0)) + '..' + PathDelim + 'data';
+    DBFileName := DataFolder + PathDelim + 'tasks.db3';
+    WriteLn('Creating database: ', DBFileName);
     
     // Create REST server with SQLite database
-    Server := TRestServerDB.Create(Model, 'solution1/data/tasks.db3');
+    Server := TRestServerDB.Create(Model, DBFileName);
     try
       // Create tables if they don't exist
       Server.CreateMissingTables;

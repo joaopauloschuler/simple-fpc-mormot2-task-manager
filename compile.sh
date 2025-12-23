@@ -6,6 +6,9 @@ echo "mORMot2 Task Manager - Compilation Script"
 echo "=========================================="
 echo ""
 
+mkdir -p bin
+mkdir -p bin/units
+
 # Determine the script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR"
