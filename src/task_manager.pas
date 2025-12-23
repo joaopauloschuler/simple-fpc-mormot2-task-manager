@@ -158,8 +158,6 @@ begin
 end;
 
 procedure RunSelfTest;
-var
-  TagService: TTagService;
 begin
   WriteLn('');
   WriteLn('========================================');
@@ -170,12 +168,7 @@ begin
   TTaskService.SelfTest(Server);
   
   WriteLn('');
-  TagService := TTagService.CreateWithResolver(Server.Services);
-  try
-    TagService.SelfTest;
-  finally
-    TagService.Free;
-  end;
+  TTagService.SelfTest(Server);
   
   WriteLn('');
   WriteLn('========================================');

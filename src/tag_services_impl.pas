@@ -41,8 +41,8 @@ type
     function GetTasksByTag(TagID: TID): TVariantDynArray;
     function SearchTags(const SearchTerm: RawUtf8): TVariantDynArray;
     
-    /// Self-test method for validation
-    procedure SelfTest;
+    /// Self-test class method for validation
+    class procedure SelfTest(aRestServer: TRestServer);
   end;
 
 implementation
@@ -72,11 +72,14 @@ begin
   // Check for duplicate tag names (case-insensitive)
   ExistingTags := Server.Orm.RetrieveList(TTag, 
     'Name=?', [LowerCase(Trim(Name))]);
-  try
-    if ExistingTags.Count > 0 then
-      raise EServiceException.Create('Tag with this name already exists');
-  finally
-    ExistingTags.Free;
+  if ExistingTags <> nil then
+  begin
+    try
+      if ExistingTags.Count > 0 then
+        raise EServiceException.Create('Tag with this name already exists');
+    finally
+      ExistingTags.Free;
+    end;
   end;
   
   // Use provided color or default
@@ -104,7 +107,8 @@ begin
   Tag := TTag.Create(Server.Orm, TagID);
   try
     if Tag.ID = 0 then
-      raise EServiceException.CreateUtf8('Tag % not found', [TagID]);
+      raise EServiceException.Create('Tag not found');
+    
     result := TagToVariant(Tag);
   finally
     Tag.Free;
@@ -119,33 +123,39 @@ var
 begin
   result := false;
   
+  // Validate input
+  if Trim(Name) = '' then
+    raise EServiceException.Create('Tag name cannot be empty');
+  
+  // Load existing tag
   Tag := TTag.Create(Server.Orm, TagID);
   try
     if Tag.ID = 0 then
-      raise EServiceException.CreateUtf8('Tag % not found', [TagID]);
-    
-    // Validate input
-    if Trim(Name) = '' then
-      raise EServiceException.Create('Tag name cannot be empty');
+      raise EServiceException.Create('Tag not found');
     
     // Check for duplicate tag names (excluding current tag)
     ExistingTags := Server.Orm.RetrieveList(TTag, 
       'Name=? AND ID<>?', [LowerCase(Trim(Name)), TagID]);
-    try
-      if ExistingTags.Count > 0 then
-        raise EServiceException.Create('Tag with this name already exists');
-    finally
-      ExistingTags.Free;
+    if ExistingTags <> nil then
+    begin
+      try
+        if ExistingTags.Count > 0 then
+          raise EServiceException.Create('Tag with this name already exists');
+      finally
+        ExistingTags.Free;
+      end;
     end;
     
-    // Use provided color or keep existing
+    // Use provided color or default
     if (Color = '') or not IsValidColor(Color) then
-      ActualColor := Tag.Color
+      ActualColor := GetDefaultColor
     else
       ActualColor := Color;
     
+    // Update tag
     Tag.Name := LowerCase(Trim(Name));
     Tag.Color := ActualColor;
+    
     result := Server.Orm.Update(Tag);
   finally
     Tag.Free;
@@ -154,23 +164,22 @@ end;
 
 function TTagService.DeleteTag(TagID: TID): boolean;
 var
-  Tag: TTag;
+  TaskTags: TObjectList;
 begin
   result := false;
   
-  // Check if tag exists
-  Tag := TTag.Create(Server.Orm, TagID);
-  try
-    if Tag.ID = 0 then
-      raise EServiceException.CreateUtf8('Tag % not found', [TagID]);
-  finally
-    Tag.Free;
+  // First, delete all task-tag associations
+  TaskTags := Server.Orm.RetrieveList(TTaskTag, 'TagID=?', [TagID]);
+  if TaskTags <> nil then
+  begin
+    try
+      Server.Orm.Delete(TTaskTag, 'TagID=?', [TagID]);
+    finally
+      TaskTags.Free;
+    end;
   end;
   
-  // Delete all task-tag associations first
-  Server.Orm.ExecuteFmt('DELETE FROM TaskTag WHERE TagID=?', [TagID], []);
-  
-  // Delete the tag
+  // Then delete the tag itself
   result := Server.Orm.Delete(TTag, TagID);
 end;
 
@@ -180,7 +189,12 @@ var
   Tag: TTag;
   i: integer;
 begin
+  SetLength(result, 0);
+  
   Tags := Server.Orm.RetrieveList(TTag, '', []);
+  if Tags = nil then
+    exit;
+  
   try
     SetLength(result, Tags.Count);
     for i := 0 to Tags.Count - 1 do
@@ -196,24 +210,24 @@ end;
 function TTagService.AddTagToTask(TaskID: TID; TagID: TID): boolean;
 var
   TaskTag: TTaskTag;
-  Existing: TObjectList;
+  ExistingLinks: TObjectList;
 begin
   result := false;
   
-  // Check if association already exists
-  Existing := Server.Orm.RetrieveList(TTaskTag, 
+  // Check if link already exists
+  ExistingLinks := Server.Orm.RetrieveList(TTaskTag, 
     'TaskID=? AND TagID=?', [TaskID, TagID]);
-  try
-    if Existing.Count > 0 then
-    begin
-      result := true; // Already associated
-      exit;
+  if ExistingLinks <> nil then
+  begin
+    try
+      if ExistingLinks.Count > 0 then
+        exit; // Link already exists
+    finally
+      ExistingLinks.Free;
     end;
-  finally
-    Existing.Free;
   end;
   
-  // Create new association
+  // Create new task-tag link
   TaskTag := TTaskTag.Create;
   try
     TaskTag.TaskID := TaskID;
@@ -227,9 +241,8 @@ end;
 
 function TTagService.RemoveTagFromTask(TaskID: TID; TagID: TID): boolean;
 begin
-  result := Server.Orm.ExecuteFmt(
-    'DELETE FROM TaskTag WHERE TaskID=? AND TagID=?', 
-    [TaskID, TagID], []);
+  result := Server.Orm.Delete(TTaskTag, 
+    'TaskID=? AND TagID=?', [TaskID, TagID]);
 end;
 
 function TTagService.GetTaskTags(TaskID: TID): TVariantDynArray;
@@ -239,7 +252,12 @@ var
   Tag: TTag;
   i: integer;
 begin
+  SetLength(result, 0);
+  
   TaskTags := Server.Orm.RetrieveList(TTaskTag, 'TaskID=?', [TaskID]);
+  if TaskTags = nil then
+    exit;
+  
   try
     SetLength(result, TaskTags.Count);
     for i := 0 to TaskTags.Count - 1 do
@@ -263,17 +281,25 @@ var
   TaskTags: TObjectList;
   TaskTag: TTaskTag;
   i: integer;
+  TaskIDs: array of TID;
 begin
+  SetLength(result, 0);
+  
   TaskTags := Server.Orm.RetrieveList(TTaskTag, 'TagID=?', [TagID]);
+  if TaskTags = nil then
+    exit;
+  
   try
-    SetLength(result, TaskTags.Count);
+    SetLength(TaskIDs, TaskTags.Count);
     for i := 0 to TaskTags.Count - 1 do
     begin
       TaskTag := TTaskTag(TaskTags[i]);
-      TDocVariantData(result[i]).InitObject([
-        'taskId', TaskTag.TaskID
-      ]);
+      TaskIDs[i] := TaskTag.TaskID;
     end;
+    
+    SetLength(result, Length(TaskIDs));
+    for i := 0 to High(TaskIDs) do
+      result[i] := TaskIDs[i];
   finally
     TaskTags.Free;
   end;
@@ -285,14 +311,16 @@ var
   Tag: TTag;
   i: integer;
 begin
-  if Trim(SearchTerm) = '' then
-  begin
-    result := ListTags;
+  SetLength(result, 0);
+  
+  if SearchTerm = '' then
     exit;
-  end;
   
   Tags := Server.Orm.RetrieveList(TTag, 
-    'Name LIKE ?', ['%' + LowerCase(Trim(SearchTerm)) + '%']);
+    'Name LIKE ?', ['%' + LowerCase(SearchTerm) + '%']);
+  if Tags = nil then
+    exit;
+  
   try
     SetLength(result, Tags.Count);
     for i := 0 to Tags.Count - 1 do
@@ -305,41 +333,67 @@ begin
   end;
 end;
 
-procedure TTagService.SelfTest;
+class procedure TTagService.SelfTest(aRestServer: TRestServer);
 var
+  Service: ITagService;
   TagID1, TagID2: TID;
   Tags: TVariantDynArray;
   TaskTags: TVariantDynArray;
+  Success: boolean;
 begin
-  WriteLn('=== Tag Service Self-Test ===');
+  WriteLn('Running TTagService self-test...');
   
-  // Test 1: Create tags
-  WriteLn('Test 1: Creating tags...');
-  TagID1 := CreateTag('urgent', '#FF0000');
-  TagID2 := CreateTag('work', '#0000FF');
-  WriteLn('  Created tag IDs: ', TagID1, ', ', TagID2);
+  if not aRestServer.Services.Resolve(ITagService, Service) then
+  begin
+    WriteLn('ERROR: Could not resolve ITagService');
+    exit;
+  end;
   
-  // Test 2: List tags
-  WriteLn('Test 2: Listing tags...');
-  Tags := ListTags;
-  WriteLn('  Found ', Length(Tags), ' tags');
-  
-  // Test 3: Search tags
-  WriteLn('Test 3: Searching tags...');
-  Tags := SearchTags('urg');
-  WriteLn('  Search for "urg" found ', Length(Tags), ' tags');
-  
-  // Test 4: Add tag to task (assuming task ID 1 exists)
-  WriteLn('Test 4: Adding tag to task...');
-  if AddTagToTask(1, TagID1) then
-    WriteLn('  Successfully added tag to task');
-  
-  // Test 5: Get task tags
-  WriteLn('Test 5: Getting task tags...');
-  TaskTags := GetTaskTags(1);
-  WriteLn('  Task has ', Length(TaskTags), ' tags');
-  
-  WriteLn('=== Tag Service Self-Test Complete ===');
+  try
+    // Test 1: Create tags
+    WriteLn('  Test 1: Creating tags...');
+    TagID1 := Service.CreateTag('urgent', '#FF0000');
+    TagID2 := Service.CreateTag('work', '#0000FF');
+    WriteLn('    Created tag IDs: ', TagID1, ', ', TagID2);
+    
+    // Test 2: List tags
+    WriteLn('  Test 2: Listing tags...');
+    Tags := Service.ListTags;
+    WriteLn('    Found ', Length(Tags), ' tags');
+    
+    // Test 3: Search tags
+    WriteLn('  Test 3: Searching tags...');
+    Tags := Service.SearchTags('urg');
+    WriteLn('    Search for "urg" found ', Length(Tags), ' tags');
+    
+    // Test 4: Add tag to task (assuming task ID 1 exists)
+    WriteLn('  Test 4: Adding tag to task...');
+    Success := Service.AddTagToTask(1, TagID1);
+    if Success then
+      WriteLn('    Successfully added tag to task')
+    else
+      WriteLn('    Failed to add tag to task');
+    
+    // Test 5: Get task tags
+    WriteLn('  Test 5: Getting task tags...');
+    TaskTags := Service.GetTaskTags(1);
+    WriteLn('    Task has ', Length(TaskTags), ' tags');
+    
+    // Test 6: Update tag
+    WriteLn('  Test 6: Updating tag...');
+    Success := Service.UpdateTag(TagID1, 'urgent-updated', '#FF00FF');
+    WriteLn('    Update result: ', Success);
+    
+    // Test 7: Delete tag
+    WriteLn('  Test 7: Deleting tag...');
+    Success := Service.DeleteTag(TagID2);
+    WriteLn('    Delete result: ', Success);
+    
+    WriteLn('Self-test completed successfully!');
+  except
+    on E: Exception do
+      WriteLn('ERROR: ', E.Message);
+  end;
 end;
 
 end.
