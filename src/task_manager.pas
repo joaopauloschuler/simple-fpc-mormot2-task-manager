@@ -24,7 +24,7 @@ uses
   mormot.db.raw.sqlite3.static,
   task_models,
   task_services,
-  task_services.impl,
+  task_services_impl,
   tag_models,
   tag_services,
   tag_services_impl,
