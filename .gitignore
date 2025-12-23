@@ -35,3 +35,6 @@ data/*.db3-shm
 # Keep directory structure
 !bin/.gitkeep
 !data/.gitkeep
+
+# Compiler resource files
+*.res
