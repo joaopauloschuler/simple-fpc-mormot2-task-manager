@@ -24,7 +24,10 @@ uses
   mormot.db.raw.sqlite3.static,
   task_models,
   task_services,
-  task_services.impl;
+  task_services.impl,
+  tag_models,
+  tag_services,
+  tag_services_impl;
 
 var
   Model: TOrmModel;
@@ -34,9 +37,46 @@ var
 procedure CreateSampleData;
 var
   Task: TTask;
+  Tag: TTag;
+  TagID1, TagID2, TagID3: TID;
+  TaskTag: TTaskTag;
 begin
-  WriteLn('Creating sample tasks...');
+  WriteLn('Creating sample tasks and tags...');
   
+  // Create sample tags
+  Tag := TTag.Create;
+  try
+    Tag.Name := 'urgent';
+    Tag.Color := '#FF3333';
+    Tag.CreatedAt := Now;
+    TagID1 := Server.Orm.Add(Tag, true);
+  finally
+    Tag.Free;
+  end;
+  
+  Tag := TTag.Create;
+  try
+    Tag.Name := 'work';
+    Tag.Color := '#3498DB';
+    Tag.CreatedAt := Now;
+    TagID2 := Server.Orm.Add(Tag, true);
+  finally
+    Tag.Free;
+  end;
+  
+  Tag := TTag.Create;
+  try
+    Tag.Name := 'personal';
+    Tag.Color := '#2ECC71';
+    Tag.CreatedAt := Now;
+    TagID3 := Server.Orm.Add(Tag, true);
+  finally
+    Tag.Free;
+  end;
+  
+  WriteLn('Sample tags created: urgent, work, personal');
+  
+  // Create sample tasks
   Task := TTask.Create;
   try
     Task.Title := 'Welcome to Task Manager';
@@ -63,22 +103,53 @@ begin
     Task.CreatedAt := Now;
     Task.UpdatedAt := Now;
     Server.Orm.Add(Task, true);
+    
+    // Add tags to this task
+    TaskTag := TTaskTag.Create;
+    try
+      TaskTag.TaskID := Task.ID;
+      TaskTag.TagID := TagID2; // work tag
+      TaskTag.CreatedAt := Now;
+      Server.Orm.Add(TaskTag, true);
+    finally
+      TaskTag.Free;
+    end;
   finally
     Task.Free;
   end;
   
   Task := TTask.Create;
   try
-    Task.Title := 'Implement SOA Services';
-    Task.Description := 'Add service-oriented architecture layer to the application';
-    Task.Priority := 4;
+    Task.Title := 'Implement Tag System';
+    Task.Description := 'Add tagging functionality to categorize tasks';
+    Task.Priority := 3;
     Task.DueDate := Now + 1;
     Task.Status := 'completed';
     Task.IsCompleted := true;
     Task.CreatedAt := Now - 2;
     Task.UpdatedAt := Now;
-    // Task marked as completed via IsCompleted and Status fields
     Server.Orm.Add(Task, true);
+    
+    // Add tags to this task
+    TaskTag := TTaskTag.Create;
+    try
+      TaskTag.TaskID := Task.ID;
+      TaskTag.TagID := TagID2; // work tag
+      TaskTag.CreatedAt := Now;
+      Server.Orm.Add(TaskTag, true);
+    finally
+      TaskTag.Free;
+    end;
+    
+    TaskTag := TTaskTag.Create;
+    try
+      TaskTag.TaskID := Task.ID;
+      TaskTag.TagID := TagID1; // urgent tag
+      TaskTag.CreatedAt := Now;
+      Server.Orm.Add(TaskTag, true);
+    finally
+      TaskTag.Free;
+    end;
   finally
     Task.Free;
   end;
@@ -87,6 +158,8 @@ begin
 end;
 
 procedure RunSelfTest;
+var
+  TagService: TTagService;
 begin
   WriteLn('');
   WriteLn('========================================');
@@ -95,6 +168,14 @@ begin
   WriteLn('');
   
   TTaskService.SelfTest(Server);
+  
+  WriteLn('');
+  TagService := TTagService.CreateWithResolver(Server.Services);
+  try
+    TagService.SelfTest;
+  finally
+    TagService.Free;
+  end;
   
   WriteLn('');
   WriteLn('========================================');
@@ -109,8 +190,8 @@ begin
   WriteLn('============================');
   WriteLn('');
   
-  // Create ORM model
-  Model := TOrmModel.Create([TTask], 'taskmanager');
+  // Create ORM model with all entities
+  Model := TOrmModel.Create([TTask, TTag, TTaskTag], 'taskmanager');
   try
     WriteLn('Creating database...');
     
@@ -125,6 +206,7 @@ begin
       // Register SOA services
       WriteLn('Registering services...');
       Server.ServiceDefine(TTaskService, [ITaskService], sicShared);
+      Server.ServiceDefine(TTagService, [ITagService], sicShared);
       WriteLn('Services registered successfully');
       
       // Create sample data if database is empty
@@ -152,21 +234,14 @@ begin
         WriteLn('');
         WriteLn('REST API available at:');
         WriteLn('  http://localhost:8080/taskmanager/Task');
+        WriteLn('  http://localhost:8080/taskmanager/Tag');
         WriteLn('');
         WriteLn('SOA Services available at:');
         WriteLn('  http://localhost:8080/taskmanager/TaskService');
+        WriteLn('  http://localhost:8080/taskmanager/TagService');
         WriteLn('');
-        WriteLn('Examples:');
-        WriteLn('  GET  http://localhost:8080/taskmanager/Task - List all tasks');
-        WriteLn('  GET  http://localhost:8080/taskmanager/Task/1 - Get task by ID');
-        WriteLn('  POST http://localhost:8080/taskmanager/Task - Create new task');
-        WriteLn('');
-        WriteLn('Service Methods:');
-        WriteLn('  POST http://localhost:8080/taskmanager/TaskService.CreateTask');
-        WriteLn('  POST http://localhost:8080/taskmanager/TaskService.GetTask');
-        WriteLn('  POST http://localhost:8080/taskmanager/TaskService.ListTasks');
-        WriteLn('  POST http://localhost:8080/taskmanager/TaskService.SearchTasks');
-        WriteLn('  POST http://localhost:8080/taskmanager/TaskService.MarkComplete');
+        WriteLn('Web Interface:');
+        WriteLn('  Open static/index.html in your browser');
         WriteLn('');
         WriteLn('Press [Enter] to quit');
         WriteLn('');
@@ -187,7 +262,10 @@ end;
 
 begin
   // Register interfaces before using them
-  TInterfaceFactory.RegisterInterfaces([TypeInfo(ITaskService)]);
+  TInterfaceFactory.RegisterInterfaces([
+    TypeInfo(ITaskService),
+    TypeInfo(ITagService)
+  ]);
   
   try
     Run;

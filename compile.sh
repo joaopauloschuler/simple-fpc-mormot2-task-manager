@@ -18,17 +18,17 @@ fpc src/task_manager.pas \
     -FUbin/units \
     -FlmORMot2/static/x86_64-linux \
     -O1 -Mobjfpc \
-    -Fi../mORMot2/src \
+    -Fi/workspaces/mORMot2/src \
     -Fusrc \
-    -Fu../mORMot2/src/core \
-    -Fu../mORMot2/src/lib \
-    -Fu../mORMot2/src/crypt \
-    -Fu../mORMot2/src/orm \
-    -Fu../mORMot2/src/rest \
-    -Fu../mORMot2/src/db \
-    -Fu../mORMot2/src/net \
-    -Fu../mORMot2/src/soa \
-    -Fu../mORMot2/src/app
+    -Fu/workspaces/mORMot2/src/core \
+    -Fu/workspaces/mORMot2/src/lib \
+    -Fu/workspaces/mORMot2/src/crypt \
+    -Fu/workspaces/mORMot2/src/orm \
+    -Fu/workspaces/mORMot2/src/rest \
+    -Fu/workspaces/mORMot2/src/db \
+    -Fu/workspaces/mORMot2/src/net \
+    -Fu/workspaces/mORMot2/src/soa \
+    -Fu/workspaces/mORMot2/src/app
 
 if [ $? -eq 0 ]; then
     echo ""
