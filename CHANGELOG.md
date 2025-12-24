@@ -99,12 +99,11 @@ All notable changes to the mORMot2 Task Manager project.
 ### Documentation
 - README.md - Project overview and quick start
 - ARCHITECTURE.md - System architecture details
-- API.md - Complete API reference
+- API.md - Complete API reference (includes tags and comments endpoints)
 - SOA_SERVICES.md - Service layer documentation
 - DEVELOPMENT.md - Development guide
 - PROJECT_STRUCTURE.md - Code organization
 - COMMENTS_FEATURE.md - Comments system details
-- TAGS_FEATURE.md - Tags system details
 
 ### Build System
 - compile.sh - Automated compilation script

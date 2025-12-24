@@ -179,6 +179,8 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for:
 
 ## 🎯 API Endpoints
 
+### Task Endpoints
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/taskmanager/Task` | List all tasks |
@@ -187,9 +189,28 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for:
 | PUT | `/taskmanager/Task` | Update task |
 | DELETE | `/taskmanager/Task/{id}` | Delete task |
 
+### Tag Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/taskmanager/Tag` | List all tags |
+| GET | `/taskmanager/Tag/{id}` | Get tag by ID |
+| POST | `/taskmanager/Tag` | Create new tag |
+| PUT | `/taskmanager/Tag` | Update tag |
+| DELETE | `/taskmanager/Tag/{id}` | Delete tag |
+
+### Comment Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/taskmanager/Comment/{id}` | Get comment by ID |
+| POST | `/taskmanager/Comment` | Create new comment |
+| PUT | `/taskmanager/Comment` | Update comment |
+| DELETE | `/taskmanager/Comment/{id}` | Delete comment |
+
 ## 💾 Database Schema
 
-**Task Table**:
+### Task Table
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -202,6 +223,36 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for:
 | IsCompleted | BOOLEAN | Completion flag |
 | CreatedAt | REAL | Creation timestamp |
 | UpdatedAt | REAL | Last update timestamp |
+
+### Tag Table
+
+| Column | Type | Description |
+|--------|------|-------------|
+| ID | INTEGER | Primary key (auto-increment) |
+| Name | TEXT | Unique tag name (lowercase) |
+| Color | TEXT | Color code (#RRGGBB or named color) |
+| CreatedAt | REAL | Creation timestamp |
+
+### TaskTag Table (Junction)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| ID | INTEGER | Primary key (auto-increment) |
+| TaskID | INTEGER | Foreign key to Task table |
+| TagID | INTEGER | Foreign key to Tag table |
+| CreatedAt | REAL | Association timestamp |
+
+### Comment Table
+
+| Column | Type | Description |
+|--------|------|-------------|
+| ID | INTEGER | Primary key (auto-increment) |
+| TaskID | INTEGER | Foreign key to Task table |
+| Content | TEXT | Comment content (UTF-8) |
+| Author | TEXT | Author name (UTF-8) |
+| CreatedAt | REAL | Creation timestamp (UTC) |
+| UpdatedAt | REAL | Last update timestamp (UTC) |
+| IsEdited | BOOLEAN | Edit flag |
 
 ## 🔧 Configuration
 
@@ -261,7 +312,7 @@ Open source - free to use and modify.
 - [API.md](API.md) - Complete API reference
 - [DEVELOPMENT.md](DEVELOPMENT.md) - Development guide
 - [SOA_SERVICES.md](SOA_SERVICES.md) - SOA Services layer documentation
-- [TAGS_FEATURE.md](TAGS_FEATURE.md) - Task tagging feature documentation
+- [COMMENTS_FEATURE.md](COMMENTS_FEATURE.md) - Task comments feature documentation
 
 ## 🎓 Learning Resources
 
@@ -274,10 +325,8 @@ Open source - free to use and modify.
 Potential features for future versions:
 
 - [ ] User authentication and authorization
-- [ ] Task categories and tags
 - [ ] Task assignments to users
 - [ ] File attachments
-- [ ] Task comments and history
 - [ ] Search and advanced filtering
 - [ ] Export to CSV/JSON
 - [ ] Email notifications

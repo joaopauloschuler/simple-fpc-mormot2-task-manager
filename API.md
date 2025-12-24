@@ -148,6 +148,179 @@ GET /taskmanager/Task?where=Priority=3
 GET /taskmanager/Task?where=IsCompleted=false
 ```
 
+### Tag ORM Endpoints
+
+mORMot2 also provides RESTful CRUD endpoints for the Tag entity.
+
+#### List All Tags
+
+```
+GET /taskmanager/Tag
+```
+
+**Response**: Array of Tag objects
+
+```json
+[
+  {
+    "ID": 1,
+    "Name": "urgent",
+    "Color": "#FF3333",
+    "CreatedAt": "2024-12-23T10:00:00"
+  }
+]
+```
+
+#### Get Tag by ID
+
+```
+GET /taskmanager/Tag/{id}
+```
+
+**Parameters**:
+- `id` (integer): Tag ID
+
+**Response**: Single Tag object
+
+```json
+{
+  "ID": 1,
+  "Name": "urgent",
+  "Color": "#FF3333",
+  "CreatedAt": "2024-12-23T10:00:00"
+}
+```
+
+#### Create Tag
+
+```
+POST /taskmanager/Tag
+```
+
+**Request Body**:
+
+```json
+{
+  "Name": "work",
+  "Color": "#3498DB"
+}
+```
+
+**Response**: Tag ID
+
+```json
+1
+```
+
+#### Update Tag
+
+```
+PUT /taskmanager/Tag
+```
+
+**Request Body**: Complete Tag object with updated fields
+
+```json
+{
+  "ID": 1,
+  "Name": "urgent",
+  "Color": "#FF0000"
+}
+```
+
+**Response**: HTTP 200 OK
+
+#### Delete Tag
+
+```
+DELETE /taskmanager/Tag/{id}
+```
+
+**Parameters**:
+- `id` (integer): Tag ID
+
+**Response**: HTTP 200 OK
+
+### Comment ORM Endpoints
+
+mORMot2 also provides RESTful CRUD endpoints for the Comment entity.
+
+#### Get Comment by ID
+
+```
+GET /taskmanager/Comment/{id}
+```
+
+**Parameters**:
+- `id` (integer): Comment ID
+
+**Response**: Single Comment object
+
+```json
+{
+  "ID": 1,
+  "TaskID": 1,
+  "Content": "Great progress on this task!",
+  "Author": "John Doe",
+  "CreatedAt": "2024-12-23T10:30:00",
+  "UpdatedAt": "2024-12-23T10:30:00",
+  "IsEdited": false
+}
+```
+
+#### Create Comment
+
+```
+POST /taskmanager/Comment
+```
+
+**Request Body**:
+
+```json
+{
+  "TaskID": 1,
+  "Content": "This is a comment",
+  "Author": "John Doe"
+}
+```
+
+**Response**: Comment ID
+
+```json
+1
+```
+
+#### Update Comment
+
+```
+PUT /taskmanager/Comment
+```
+
+**Request Body**: Complete Comment object with updated fields
+
+```json
+{
+  "ID": 1,
+  "TaskID": 1,
+  "Content": "Updated comment text",
+  "Author": "John Doe",
+  "IsEdited": true
+}
+```
+
+**Response**: HTTP 200 OK
+
+#### Delete Comment
+
+```
+DELETE /taskmanager/Comment/{id}
+```
+
+**Parameters**:
+- `id` (integer): Comment ID
+
+**Response**: HTTP 200 OK
+
 ## Data Model
 
 ### Task Object
@@ -163,6 +336,237 @@ GET /taskmanager/Task?where=IsCompleted=false
 | IsCompleted | boolean | Completion flag |
 | CreatedAt | datetime | Creation timestamp |
 | UpdatedAt | datetime | Last update timestamp |
+
+### Tag Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| ID | integer | Unique tag identifier (auto-generated) |
+| Name | string | Tag name (unique, lowercase) |
+| Color | string | Color code (#RRGGBB format or named color) |
+| CreatedAt | datetime | Creation timestamp |
+
+### TaskTag Object (Junction Table)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| ID | integer | Unique identifier (auto-generated) |
+| TaskID | integer | Foreign key to Task |
+| TagID | integer | Foreign key to Tag |
+| CreatedAt | datetime | Association timestamp |
+
+### Comment Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| ID | integer | Unique comment identifier (auto-generated) |
+| TaskID | integer | Foreign key to Task |
+| Content | string | Comment text content (1-10000 characters) |
+| Author | string | Author name/identifier |
+| CreatedAt | datetime | Creation timestamp (UTC) |
+| UpdatedAt | datetime | Last update timestamp (UTC) |
+| IsEdited | boolean | Whether the comment has been edited |
+
+## SOA Service Endpoints
+
+In addition to ORM endpoints, the Task Manager provides SOA (Service-Oriented Architecture) service endpoints for more complex business logic operations.
+
+### TagService
+
+All TagService endpoints use POST with JSON body parameters:
+
+#### CreateTag
+
+Creates a new tag with the specified name and color.
+
+```
+POST /taskmanager/TagService/CreateTag
+Body: ["urgent", "#FF0000"]
+Response: 123  // tag ID
+```
+
+#### GetTag
+
+Retrieves tag information by ID.
+
+```
+POST /taskmanager/TagService/GetTag
+Body: [1]
+Response: {"id": 1, "name": "urgent", "color": "#FF0000", "createdAt": "..."}
+```
+
+#### UpdateTag
+
+Updates an existing tag's name and/or color.
+
+```
+POST /taskmanager/TagService/UpdateTag
+Body: [1, "new-name", "#00FF00"]
+Response: true
+```
+
+#### DeleteTag
+
+Deletes a tag and all its task associations.
+
+```
+POST /taskmanager/TagService/DeleteTag
+Body: [1]
+Response: true
+```
+
+#### ListTags
+
+Returns all tags in the system.
+
+```
+POST /taskmanager/TagService/ListTags
+Body: []
+Response: [{"id": 1, "name": "urgent", "color": "#FF0000", ...}, ...]
+```
+
+#### SearchTags
+
+Searches tags by name (case-insensitive partial match).
+
+```
+POST /taskmanager/TagService/SearchTags
+Body: ["urg"]
+Response: [{"id": 1, "name": "urgent", ...}]
+```
+
+#### AddTagToTask
+
+Associates a tag with a task.
+
+```
+POST /taskmanager/TagService/AddTagToTask
+Body: [1, 2]  // [taskID, tagID]
+Response: true
+```
+
+#### RemoveTagFromTask
+
+Removes a tag from a task.
+
+```
+POST /taskmanager/TagService/RemoveTagFromTask
+Body: [1, 2]  // [taskID, tagID]
+Response: true
+```
+
+#### GetTaskTags
+
+Returns all tags associated with a specific task.
+
+```
+POST /taskmanager/TagService/GetTaskTags
+Body: [1]  // taskID
+Response: [{"id": 2, "name": "urgent", ...}, ...]
+```
+
+#### GetTasksByTag
+
+Returns all tasks that have a specific tag.
+
+```
+POST /taskmanager/TagService/GetTasksByTag
+Body: [1]  // tagID
+Response: [{"id": 1, "title": "Task 1", ...}, ...]
+```
+
+### CommentService
+
+All CommentService endpoints use POST with JSON body parameters:
+
+#### CreateComment
+
+Creates a new comment on a task.
+
+```
+POST /taskmanager/CommentService/CreateComment
+Body: [1, "Great progress on this task!", "John Doe"]  // [taskId, content, author]
+Response: 42  // The new comment ID
+```
+
+#### GetComment
+
+Retrieves a specific comment by ID.
+
+```
+POST /taskmanager/CommentService/GetComment
+Body: [42]  // commentId
+Response: {
+  "id": 42,
+  "taskId": 1,
+  "content": "Great progress on this task!",
+  "author": "John Doe",
+  "createdAt": "2024-12-23T10:30:00",
+  "updatedAt": "2024-12-23T10:30:00",
+  "isEdited": false
+}
+```
+
+#### UpdateComment
+
+Updates the content of an existing comment. Automatically sets `isEdited` to true.
+
+```
+POST /taskmanager/CommentService/UpdateComment
+Body: [42, "Updated comment text"]  // [commentId, newContent]
+Response: true
+```
+
+#### DeleteComment
+
+Deletes a specific comment.
+
+```
+POST /taskmanager/CommentService/DeleteComment
+Body: [42]  // commentId
+Response: true
+```
+
+#### GetTaskComments
+
+Retrieves all comments for a specific task, ordered by creation date (oldest first).
+
+```
+POST /taskmanager/CommentService/GetTaskComments
+Body: [1]  // taskId
+Response: [
+  {
+    "id": 42,
+    "taskId": 1,
+    "content": "First comment",
+    "author": "Alice",
+    "createdAt": "2024-12-23T10:30:00",
+    "updatedAt": "2024-12-23T10:30:00",
+    "isEdited": false
+  },
+  ...
+]
+```
+
+#### GetCommentCount
+
+Returns the number of comments on a task.
+
+```
+POST /taskmanager/CommentService/GetCommentCount
+Body: [1]  // taskId
+Response: 5
+```
+
+#### DeleteTaskComments
+
+Deletes all comments associated with a task.
+
+```
+POST /taskmanager/CommentService/DeleteTaskComments
+Body: [1]  // taskId
+Response: 3  // number of deleted comments
+```
 
 ## Status Codes
 
