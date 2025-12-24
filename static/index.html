@@ -378,7 +378,7 @@
         // Load tasks
         async function loadTasks(filter = '') {
             try {
-                const url = `${API_BASE}/Task`;
+                const url = `${API_BASE}/Task?select=*`;
                 const response = await fetch(url);
                 
                 if (!response.ok) {

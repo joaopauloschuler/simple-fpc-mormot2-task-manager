@@ -15,13 +15,25 @@ This document describes the REST API provided by the mORMot2 Task Manager server
 
 mORMot2 automatically provides RESTful CRUD endpoints for the Task entity.
 
-#### List All Tasks
+#### List All Task IDs
 
 ```
 GET /taskmanager/Task
 ```
 
-**Response**: Array of Task objects
+**Response**: Array of Task IDs only (mORMot2 default behavior for security/performance)
+
+```json
+[{"ID":1},{"ID":2},{"ID":3}]
+```
+
+#### List All Tasks with Full Details
+
+```
+GET /taskmanager/Task?select=*
+```
+
+**Response**: Array of Task objects with all fields
 
 ```json
 [
