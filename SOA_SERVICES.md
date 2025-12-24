@@ -29,7 +29,7 @@ end;
 
 ### Service Implementation: TTaskService
 
-Located in `src/task_services.impl.pas`, the `TTaskService` class implements the business logic:
+Located in `src/task_services_impl.pas`, the `TTaskService` class implements the business logic:
 
 **Key Features:**
 - Inherits from `TInjectableObjectRest` for dependency injection and REST integration

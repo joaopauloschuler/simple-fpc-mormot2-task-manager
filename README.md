@@ -260,6 +260,8 @@ Open source - free to use and modify.
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture and design
 - [API.md](API.md) - Complete API reference
 - [DEVELOPMENT.md](DEVELOPMENT.md) - Development guide
+- [SOA_SERVICES.md](SOA_SERVICES.md) - SOA Services layer documentation
+- [TAGS_FEATURE.md](TAGS_FEATURE.md) - Task tagging feature documentation
 
 ## 🎓 Learning Resources
 

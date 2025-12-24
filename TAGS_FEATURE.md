@@ -94,7 +94,7 @@ Searches tags by name (case-insensitive partial match).
 function AddTagToTask(TaskID: TID; TagID: TID): boolean;
 ```
 Associates a tag with a task.
-- **Returns**: true if successful (idempotent - returns true if already associated)
+- **Returns**: true if successfully associated, false if the association already exists
 
 #### RemoveTagFromTask
 ```pascal
