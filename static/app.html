@@ -560,7 +560,7 @@
     </div>
     
     <script>
-        const API_BASE = 'http://localhost:8080';
+        const API_BASE = 'http://localhost:8080/taskmanager';
         let currentFilter = 'all';
         let allTasks = [];
         let allTags = [];
@@ -610,7 +610,7 @@
         
         async function loadTasks() {
             try {
-                const response = await fetch(`${API_BASE}/taskmanager/Task`);
+                const response = await fetch(`${API_BASE}/Task?select=*`);
                 if (!response.ok) throw new Error('Failed to load tasks');
                 
                 allTasks = await response.json();
@@ -668,7 +668,7 @@
             if (!confirm('Are you sure you want to delete this task?')) return;
             
             try {
-                await fetch(`${API_BASE}/taskmanager/Task/${taskId}`, {
+                await fetch(`${API_BASE}/Task/${taskId}`, {
                     method: 'DELETE'
                 });
                 showMessage('Task deleted!', 'success');

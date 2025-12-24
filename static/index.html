@@ -372,7 +372,7 @@
             messageDiv.style.display = 'block';
             setTimeout(() => {
                 messageDiv.style.display = 'none';
-            }, 3000);
+            }, 30000);
         }
         
         // Load tasks
@@ -473,28 +473,20 @@
             }
         });
         
-        // Toggle task completion
+        // Toggle task completion (use SOA TaskService.MarkComplete to avoid REST collection PUT semantics)
         async function toggleComplete(taskId, isComplete) {
             try {
-                // First get the task
-                const getResponse = await fetch(`${API_BASE}/Task/${taskId}`);
-                const task = await getResponse.json();
-                
-                // Update it
-                task.IsCompleted = isComplete;
-                task.Status = isComplete ? 'completed' : 'pending';
-                task.UpdatedAt = new Date().toISOString();
-                
-                const response = await fetch(`${API_BASE}/Task`, {
-                    method: 'PUT',
+                const url = `${API_BASE}/TaskService/MarkComplete`;
+                const response = await fetch(url, {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(task)
+                    body: JSON.stringify([taskId, isComplete])
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 showMessage('Task updated!', 'success');
                 loadTasks(currentFilter);
             } catch (error) {
