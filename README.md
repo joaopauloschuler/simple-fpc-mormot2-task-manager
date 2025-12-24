@@ -189,6 +189,18 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for:
 | PUT | `/taskmanager/Task` | Update task |
 | DELETE | `/taskmanager/Task/{id}` | Delete task |
 
+### TaskService (SOA Endpoints)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/taskmanager/TaskService/CreateTask` | Create a new task with validation |
+| POST | `/taskmanager/TaskService/GetTask` | Retrieve a single task by ID |
+| POST | `/taskmanager/TaskService/UpdateTask` | Update an existing task's properties |
+| POST | `/taskmanager/TaskService/DeleteTask` | Delete a task from the system |
+| POST | `/taskmanager/TaskService/ListTasks` | List all tasks, optionally filtered by status |
+| POST | `/taskmanager/TaskService/MarkComplete` | Mark a task as complete or incomplete |
+| POST | `/taskmanager/TaskService/SearchTasks` | Search tasks by title or description |
+
 ### Tag Endpoints
 
 | Method | Endpoint | Description |
@@ -199,6 +211,21 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for:
 | PUT | `/taskmanager/Tag` | Update tag |
 | DELETE | `/taskmanager/Tag/{id}` | Delete tag |
 
+### TagService (SOA Endpoints)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/taskmanager/TagService/CreateTag` | Create a new tag |
+| POST | `/taskmanager/TagService/GetTag` | Get a tag by ID |
+| POST | `/taskmanager/TagService/UpdateTag` | Update an existing tag |
+| POST | `/taskmanager/TagService/DeleteTag` | Delete a tag (and all its task associations) |
+| POST | `/taskmanager/TagService/ListTags` | List all tags |
+| POST | `/taskmanager/TagService/AddTagToTask` | Add a tag to a task |
+| POST | `/taskmanager/TagService/RemoveTagFromTask` | Remove a tag from a task |
+| POST | `/taskmanager/TagService/GetTaskTags` | Get all tags for a specific task |
+| POST | `/taskmanager/TagService/GetTasksByTag` | Get all tasks with a specific tag |
+| POST | `/taskmanager/TagService/SearchTags` | Search tags by name |
+
 ### Comment Endpoints
 
 | Method | Endpoint | Description |
@@ -207,6 +234,18 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for:
 | POST | `/taskmanager/Comment` | Create new comment |
 | PUT | `/taskmanager/Comment` | Update comment |
 | DELETE | `/taskmanager/Comment/{id}` | Delete comment |
+
+### CommentService (SOA Endpoints)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/taskmanager/CommentService/CreateComment` | Create a new comment on a task |
+| POST | `/taskmanager/CommentService/GetComment` | Retrieve a specific comment by ID |
+| POST | `/taskmanager/CommentService/UpdateComment` | Update an existing comment's content |
+| POST | `/taskmanager/CommentService/DeleteComment` | Delete a comment |
+| POST | `/taskmanager/CommentService/GetTaskComments` | List all comments for a specific task |
+| POST | `/taskmanager/CommentService/GetCommentCount` | Count the number of comments on a task |
+| POST | `/taskmanager/CommentService/DeleteTaskComments` | Delete all comments for a specific task |
 
 ## 💾 Database Schema
 
