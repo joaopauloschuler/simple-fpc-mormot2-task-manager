@@ -5,7 +5,7 @@
     "context": ".."
   },
   "workspaceFolder": "/workspaces/simple-fpc-mormot2-task-manager",
-  "postCreateCommand": "fpc -v || true",
+  "postCreateCommand": "./install_dependencies.sh",
   "remoteUser": "vscode",
   "customizations": {
     "vscode": {

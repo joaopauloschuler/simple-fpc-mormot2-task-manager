@@ -28,13 +28,21 @@ A modern, high-performance task management system built with Free Pascal and the
 
 1. **Clone the repository** (if not already done)
 
-2. **Ensure mORMot2 is available**
-   - The mORMot2 framework should be in `../mORMot2/` relative to this folder
-   - Static libraries should be in `../mORMot2/static/x86_64-linux/`
+2. **Install dependencies and mORMot2**
+   
+   Run the dependency installation script to set up FPC, mORMot2, and required tools:
+   ```bash
+   ./install_dependencies.sh
+   ```
+   
+   This script will:
+   - Install Free Pascal Compiler (FPC) if not already installed
+   - Install git, wget, and tar utilities if needed
+   - Clone the mORMot2 repository to `../mORMot2/`
+   - Download and extract the mORMot2 static libraries (SQLite3)
 
 3. **Compile the server**
    ```bash
-   cd solution1
    ./compile.sh
    ```
 
@@ -228,6 +236,7 @@ Server := TRestServerDB.Create(Model, 'your/path/tasks.db3');
 
 **Compilation fails**:
 - Verify FPC is installed: `fpc -version`
+- Run `./install_dependencies.sh` to install all dependencies
 - Check mORMot2 location: `../mORMot2/src/` must exist
 - Ensure static libraries are present: `../mORMot2/static/x86_64-linux/`
 

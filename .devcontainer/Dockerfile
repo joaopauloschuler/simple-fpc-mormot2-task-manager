@@ -3,13 +3,17 @@ FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Free Pascal, fpc-source and Lazarus non-interactively and clean up
+# Install Free Pascal, fpc-source, Lazarus, and additional tools for install_dependencies.sh
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
     fpc \
     fpc-source \
     lazarus \
     build-essential \
+    git \
+    wget \
+    tar \
+    sudo \
  || true \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*

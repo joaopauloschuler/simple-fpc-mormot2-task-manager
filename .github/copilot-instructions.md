@@ -48,9 +48,25 @@ end;
 
 ## Build & Run Workflow
 
+**Install Dependencies**: `./install_dependencies.sh` (first-time setup only)
 **Compile**: `./compile.sh` (uses FPC with mORMot2 paths in `../mORMot2/`)
 **Run**: `./run.sh` or `./bin/task_manager`
 **Test**: Open `static/index.html` or curl `http://localhost:8080/taskmanager/Task`
+
+### First-Time Setup / Testing Requirements
+
+Before compiling or testing, ensure all dependencies are installed by running:
+```bash
+./install_dependencies.sh
+```
+
+This script will:
+- Install Free Pascal Compiler (FPC) if not present
+- Install git, wget, and tar utilities
+- Clone mORMot2 repository to `../mORMot2/`
+- Download and extract mORMot2 static libraries (SQLite3)
+
+**IMPORTANT**: Always run `./install_dependencies.sh` before attempting to compile or test in a fresh environment.
 
 ### Key Compiler Flags (in compile.sh)
 - `-Fl../mORMot2/static/x86_64-linux`: Link static SQLite3 library
@@ -140,5 +156,6 @@ curl -X POST http://localhost:8080/taskmanager/TaskService/CreateTask \
 - **Always update timestamps** when modifying entities (set `UpdatedAt := NowUtc`)
 - **Add validation** for all user inputs in service implementations
 - **Free objects** in try-finally blocks (Pascal requires manual memory management)
+- **Run `./install_dependencies.sh`** first if testing in a fresh environment
 - **Test compilation** after changes: `./compile.sh` shows line-specific errors
 - **Check logs** if service fails: mORMot2 logs to console during development
