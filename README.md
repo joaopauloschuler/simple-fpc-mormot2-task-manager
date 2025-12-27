@@ -179,6 +179,42 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for:
 
 ## 🎯 API Endpoints
 
+### 📚 Understanding the Dual API Paradigm (ORM + SOA)
+
+You'll notice this project exposes **two ways** to perform the same operations. For example, to delete a comment:
+- **ORM Endpoint**: `DELETE /taskmanager/Comment/{id}`
+- **SOA Endpoint**: `POST /taskmanager/CommentService/DeleteComment`
+
+**This is intentional for educational purposes!** This project demonstrates both paradigms supported by mORMot2:
+
+| Aspect | ORM Endpoints | SOA Endpoints |
+|--------|---------------|---------------|
+| **Pattern** | RESTful CRUD | Service-Oriented |
+| **HTTP Methods** | GET, POST, PUT, DELETE | POST only |
+| **Auto-generated** | Yes, from TOrm classes | No, manually defined |
+| **Business Logic** | Minimal (direct DB access) | Rich (validation, workflows) |
+| **Example** | `DELETE /Task/1` | `POST /TaskService/DeleteTask` |
+
+#### ✅ Why This Is Good for Learning
+
+- **Educational value** - Shows both paradigms side-by-side
+- **Framework showcase** - Demonstrates mORMot2's dual capabilities
+- **Comparison opportunity** - See when each approach is appropriate
+- **Real-world patterns** - Both patterns are used in production systems
+
+#### ⚠️ Why Real Production Systems Should Choose One
+
+In a production system, you'd typically choose **one paradigm** (usually SOA for complex apps) because:
+
+- **API surface area** - More endpoints = more to document and maintain
+- **Potential confusion** - Clients may wonder "which one should I use?"
+- **Consistency questions** - Do both paths behave identically? (validation, side effects)
+- **Testing overhead** - Both paths need separate test coverage
+
+**Recommendation**: For production, prefer **SOA endpoints** when you need validation and business logic, or **ORM endpoints** for simple admin/internal tools.
+
+---
+
 ### Task Endpoints
 
 | Method | Endpoint | Description |
