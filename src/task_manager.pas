@@ -12,6 +12,8 @@ uses
   mormot.core.os,
   mormot.core.log,
   mormot.core.data,
+  mormot.core.text,
+  mormot.core.unicode,
   mormot.core.interfaces,
   mormot.orm.core,
   mormot.rest.core,
@@ -21,6 +23,7 @@ uses
   mormot.soa.core,
   mormot.soa.server,
   mormot.net.server,
+  mormot.net.http,
   mormot.db.raw.sqlite3.static,
   task_models,
   task_services,
@@ -32,10 +35,54 @@ uses
   comment_services,
   comment_services_impl;
 
+type
+  { TStaticFileServer - Helper class to serve static files }
+  TStaticFileServer = class
+  public
+    Folder: TFileName;
+    function ServeFile(Ctxt: THttpServerRequestAbstract): cardinal;
+  end;
+
 var
   Model: TOrmModel;
   Server: TRestServerDB;
   HttpServer: TRestHttpServer;
+  StaticServer: TStaticFileServer;
+
+function TStaticFileServer.ServeFile(Ctxt: THttpServerRequestAbstract): cardinal;
+var
+  FileName: TFileName;
+  RequestPath: RawUtf8;
+begin
+  // Get the path after /static/
+  RequestPath := Ctxt.Url;
+  if IdemPChar(pointer(RequestPath), '/STATIC/') then
+    Delete(RequestPath, 1, 8)
+  else if IdemPChar(pointer(RequestPath), '/STATIC') then
+    RequestPath := 'index.html';
+  
+  // Default to index.html if empty
+  if (RequestPath = '') or (RequestPath = '/') then
+    RequestPath := 'index.html';
+    
+  // Build full file path
+  FileName := Folder + Utf8ToString(StringReplaceChars(RequestPath, '/', PathDelim));
+  
+  // Check if file exists
+  if FileExists(FileName) then
+  begin
+    // Serve the file using mORMot's static file mechanism
+    Ctxt.OutContentType := STATICFILE_CONTENT_TYPE;
+    Ctxt.OutContent := StringToUtf8(FileName);
+    result := HTTP_SUCCESS;
+  end
+  else
+  begin
+    Ctxt.OutContentType := TEXT_CONTENT_TYPE;
+    Ctxt.OutContent := 'File not found: ' + RequestPath;
+    result := HTTP_NOTFOUND;
+  end;
+end;
   
 procedure CreateSampleData;
 var
@@ -221,6 +268,11 @@ begin
       
       WriteLn('Starting HTTP server...');
       
+      // Setup static file server
+      StaticServer := TStaticFileServer.Create;
+      StaticServer.Folder := ExtractFilePath(ParamStr(0)) + '..' + PathDelim + 'static' + PathDelim;
+      WriteLn('Static folder: ', StaticServer.Folder);
+      
       // Create HTTP server on port 8080
       HttpServer := TRestHttpServer.Create(
         '8080',
@@ -231,6 +283,11 @@ begin
       try
         // Enable CORS for web clients
         HttpServer.AccessControlAllowOrigin := '*';
+        
+        // Register static file routes
+        HttpServer.Route.Get('/static/<path:path>', @StaticServer.ServeFile);
+        HttpServer.Route.Get('/static', @StaticServer.ServeFile);
+        WriteLn('Static file serving enabled at /static/');
         
         WriteLn('');
         WriteLn('Server running successfully!');
@@ -245,7 +302,7 @@ begin
         WriteLn('  http://localhost:8080/taskmanager/CommentService');
         WriteLn('');
         WriteLn('Web Interface:');
-        WriteLn('  Open static/index.html in your browser');
+        WriteLn('  http://localhost:8080/static/index.html');
         WriteLn('');
         WriteLn('Press [Enter] to quit');
         WriteLn('');
@@ -255,6 +312,7 @@ begin
         WriteLn('Shutting down...');
       finally
         HttpServer.Free;
+        StaticServer.Free;
       end;
     finally
       Server.Free;
