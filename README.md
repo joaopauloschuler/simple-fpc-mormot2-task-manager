@@ -1,5 +1,5 @@
 
-# mORMot2 Task Manager
+# FPC mORMot2 Task Manager
 
 A modern, high-performance task management system built with Free Pascal and the mORMot2 framework.
 
