@@ -109,26 +109,26 @@ See [API.md](API.md) for complete API documentation.
 
 ## 📁 Project Structure
 
-```
-solution1/
-├── src/
-│   ├── task_models.pas      # ORM models (TTask entity)
-│   ├── task_services.pas    # Service interfaces (placeholder)
-│   └── task_manager.pas     # Main server program
-├── static/
-│   └── index.html           # Web client interface
-├── data/
-│   └── tasks.db3            # SQLite database (auto-created)
-├── bin/
-│   ├── task_manager         # Compiled executable
-│   └── units/               # Compiled units
-├── compile.sh               # Build script
-├── run.sh                   # Run script
-├── README.md                # This file
-├── ARCHITECTURE.md          # Architecture documentation
-├── API.md                   # API documentation
-└── DEVELOPMENT.md           # Development guide
-```
+<pre>
+/
+├── <a href="src/">src/</a>
+│   ├── <a href="src/task_models.pas">task_models.pas</a>      # ORM models (TTask entity)
+│   ├── <a href="src/task_services.pas">task_services.pas</a>    # Service interfaces (placeholder)
+│   └── <a href="src/task_manager.pas">task_manager.pas</a>     # Main server program
+├── <a href="static/">static/</a>
+│   └── <a href="static/index.html">index.html</a>           # Web client interface
+├── <a href="data/">data/</a>
+│   └── <a href="data/tasks.db3">tasks.db3</a>            # SQLite database (auto-created)
+├── <a href="bin/">bin/</a>
+│   ├── <a href="bin/task_manager">task_manager</a>         # Compiled executable
+│   └── <a href="bin/units/">units/</a>               # Compiled units
+├── <a href="compile.sh">compile.sh</a>               # Build script
+├── <a href="run.sh">run.sh</a>                   # Run script
+├── <a href="README.md">README.md</a>                # This file
+├── <a href="ARCHITECTURE.md">ARCHITECTURE.md</a>          # Architecture documentation
+├── <a href="API.md">API.md</a>                   # API documentation
+└── <a href="DEVELOPMENT.md">DEVELOPMENT.md</a>           # Development guide
+</pre>
 
 ## 🏗️ Architecture
 
