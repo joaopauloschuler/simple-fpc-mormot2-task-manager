@@ -108,7 +108,6 @@ curl -X DELETE http://localhost:8080/taskmanager/Task/1
 See [API.md](API.md) for complete API documentation.
 
 ## 📁 Project Structure
-The below tree shows the main files only.
 <pre>
 /
 ├── <a href="src/">src/</a>
