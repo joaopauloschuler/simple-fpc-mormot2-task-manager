@@ -108,15 +108,17 @@ curl -X DELETE http://localhost:8080/taskmanager/Task/1
 See [API.md](API.md) for complete API documentation.
 
 ## 📁 Project Structure
-
+The below tree shows the main files only.
 <pre>
 /
 ├── <a href="src/">src/</a>
 │   ├── <a href="src/task_models.pas">task_models.pas</a>      # ORM models (TTask entity)
 │   ├── <a href="src/task_services.pas">task_services.pas</a>    # Service interfaces (placeholder)
-│   └── <a href="src/task_manager.pas">task_manager.pas</a>     # Main server program
+│   ├── <a href="src/task_manager.pas">task_manager.pas</a>     # Main server program
+│   └── Similar to task_*.pas files shown above for tags and comments
 ├── <a href="static/">static/</a>
-│   └── <a href="static/index.html">index.html</a>           # Web client interface
+│   ├── <a href="static/index.html">index.html</a>           # Web client interface
+│   └── Other *.html client examples.
 ├── <a href="data/">data/</a>
 │   └── <a href="data/tasks.db3">tasks.db3</a>            # SQLite database (auto-created)
 ├── <a href="bin/">bin/</a>
